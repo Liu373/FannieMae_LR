@@ -237,9 +237,90 @@ def Graph_AUC(Df_Default_5_FM, Df_Yhat_Prob, ns_probs, lr_auc, Period):
   
   
   
+def Graph_Default_Curve(group_pd_7, group_pd_8, Period):
+  
+  pd_bins = np.linspace(0, 0.06, num=21)
+  
+  plt.plot(pd_bins[1:], group_pd_7['Actual_PD'][:], 'o', label='Actual')
+  plt.plot(pd_bins[1:], group_pd_7.Yhat_Prob['mean'][:], 'o', label='Predicted')
+  
+  plt.title('{0} Actual vs Predicted Default Rate'.format(Period))
+  plt.xlabel('Bins of Predicted Default Rate')
+  plt.ylabel('Default Rate')
+  plt.legend()
+  plt.show()
   
   
   
+  
+  plt.plot(pd_bins[1:], group_pd_8['Actual_PD'][:], 'o', label='Actual')
+  plt.plot(pd_bins[1:], group_pd_8.Stressed_PD['mean'][:], 'o', label='Predicted')
+  
+  plt.title('{0} Actual vs Stressed Predicted Default Rate'.format(Period))
+  plt.xlabel('Bins of Predicted Default Rate')
+  plt.ylabel('Default Rate')
+  plt.legend()
+  plt.show()
+  
+  
+  
+
+  
+def cv_test(X_normal, Y):
+  
+  cross_validation = StratifiedKFold(n_splits=5, shuffle=True, random_state=1)
+  clf = GridSearchCV(LogisticRegression(), {'solver': ['liblinear', 'newton-cg', 'lbfgs'], 'penalty': ['l1', 'l2'], 'C': [0.1, 1, 5]}, 
+                     cv=cross_validation, scoring='roc_auc')
+  
+  clf.fit(X_normal, Y)
+  
+  clf_result2 = pd.DataFrame(clf.cv_results_)
+  clf_result3 = clf_result2[['param_C', 'param_solver', 'params', 'mean_test_score']]
+  clf_result4 = clf_result3[clf_result3['mean_test_score'].notnull()]
+  
+  return clf_result4
+
+
+
+
+
+
+if __name__ == '__main__':
+  
+  Path = r'C:\xxx\xxx\xxx\x\xxx\xxxx'
+  
+  Input_Scope = ['2000Q1.csv', '2000Q2.csv', '2000Q3.csv', '2000Q4.csv',
+                '2001Q1.csv, 2001Q2.csv, 2001Q3.csv, 2001Q4.csv']
+  
+  
+  Output_Socpe = ['Output_200Q1.csv', xxxxx]
+  
+  Consolidation_Scope = []
+  
+  Train_File_Name = 'Consolidated_Output_2000_2012_v2_Default5_DefaultFannieMae_Default5FM.csv'
+  
+  Test_File_Name = 'Output_2007Q4.csv'
+  
+  Column_Name = ['POOL_ID', 'LOAN_ID', 'ACT_PERIOD', 'CHANNEL', 'Get that from FannieMae R codes']
+  
+  
+  
+  ###################################### Call Function Below ###################################################
+  
+  
+  Data_Extraction(Path, Input_Scope, Column=Name)
+  
+  Consolidation(Path, Output_Scope)
+  
+  LR, X_normal, Y = LR_Training(Path, Train_File_Name)
+  
+  clf_result4 = cv_test(X_normal, Y)
+  
+  group_pd_7, group_pd_8, ns_probs, Df_Default_FannieMae, Df_Yhat_Prob, lr_auc, Period, Input_File = LR_Testing(Path, Test_File_Name, LR)
+  
+  Graph_AUC(Df_Default_FannieMae, Df_Yhat_Prob, ns_probs, lr_auc, Period)
+  
+  Graph_Default_Curve(group_pd_7, group_pd_8, Period)
 
 
 
