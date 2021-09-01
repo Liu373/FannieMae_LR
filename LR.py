@@ -200,7 +200,39 @@ def LR_Testing(Path, Test_File_Name, LR):
                                                                                                                       'Default_5_FM': 'sum'}))
   
   
+  group_pd_7['Actual_PD'] = group_pd_7.Default_5_FM['sum'] / group_pd_7.Yhat_Prob['count']
+  group_pd_8['Actual_PD'] = group_pd_8.Default_5_FM['sum'] / group_pd_7.Stressed_PD['count']
   
+  lr_auc = roc_auc_score(Input_File['Default_5_FM'], Input_File['Yhat_Prob'])
+  ns_probs = [0, for _ in range(len(Input_File['Default_5_FM']))]
+  
+  print('ROC AUC: {0}'.format(lr_auc))
+  
+  Df_Default_5_FM = Input_File['Default_5_FM']
+  Df_Yhat_Prob = Input_File['Yhat_Prob']
+  
+  return group_pd_7, group_pd_8, ns_probs, Df_Default_5_FM, Df_Yhat_Prob, lr_auc, Period, Input_File
+
+
+
+
+
+
+def Graph_AUC(Df_Default_5_FM, Df_Yhat_Prob, ns_probs, lr_auc, Period):
+  
+  ns_fpr, ns_tpr, _ = roc_curve(Df_Default_5_FM, ns_probs)
+  lr_fpr, lr_tpr, _ = roc_curve(Df_Default_5_FM, Df_Yhat_Prob)
+  
+  plt.plot(ns_fpr, ns_tpr, linestyle='--', label='mean')
+  plt.plot(lr_fpr, lr_tpr, marker='.', label='Logistic')
+  
+  plt.title('{0} ROC AUC: {1}'.format(Period, round(lr_auc, 4)))
+  plt.xlabel('False Positive Rate')
+  plt.ylabel('True Positive Rate')
+  plt.legend()
+  plt.show()
+
+
   
   
   
